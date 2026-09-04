@@ -8,21 +8,26 @@ Built for **AI Innovation Hackathon 2026 — Round 2 (Bharat Academix)**.
 
 ## Overview
 
-AI Teacher is an AI-powered learning platform that creates personalized lessons based on a learner's topic, level, language, and available time.
+AI Teacher is an AI-powered learning platform that creates personalized lessons based on a learner's:
+
+- Topic
+- Learning level
+- Preferred language
+- Available time
 
 Learners can either:
 
-- Upload learning material such as PDF, DOCX, or PPTX
+- Upload learning material such as **PDF, DOCX, or PPTX**
 - Provide a topic directly
 
 The system then:
 
-1. Retrieves relevant information from uploaded material using RAG.
-2. Generates a structured and personalized lesson using an LLM.
+1. Retrieves relevant information from uploaded material using **RAG**.
+2. Generates a structured and personalized lesson using an **LLM**.
 3. Converts lesson segments into narrated teaching videos.
 4. Asks checkpoint questions during the lesson.
 5. Evaluates learner responses.
-6. Detects incorrect understanding and triggers adaptive re-teaching.
+6. Detects incorrect understanding and triggers **adaptive re-teaching**.
 7. Conducts a final assessment.
 8. Generates a learning report with score, strengths, weak areas, and recommendations.
 9. Persists learner history across sessions.
@@ -35,13 +40,23 @@ The system then:
 
 Learners can upload study material.
 
-The system:
+The system follows:
 
-`Document → Text Extraction → Chunking → Retrieval → Grounded Lesson`
+```text
+Document
+   ↓
+Text Extraction
+   ↓
+Chunking
+   ↓
+Retrieval
+   ↓
+Grounded Lesson
+```
 
 The current retrieval implementation uses **TF-IDF**, providing a lightweight approach without requiring a separate embedding model.
 
-Supported document formats include:
+Supported document formats:
 
 - PDF
 - DOCX
@@ -69,7 +84,17 @@ Adaptive teaching is a core part of the system.
 
 When a learner gives an incorrect answer:
 
-`Wrong Answer → Evaluation → Feedback → Re-teaching → New Checkpoint`
+```text
+Wrong Answer
+     ↓
+Evaluation
+     ↓
+Feedback
+     ↓
+Adaptive Re-teaching
+     ↓
+New Checkpoint
+```
 
 Instead of simply repeating the same explanation, the system generates a simpler alternative explanation with different examples or analogies.
 
@@ -141,78 +166,89 @@ This allows learning history to persist across sessions.
 ## Application Flow
 
 ```text
+                   ┌──────────────────┐
+                   │   Learner Setup  │
+                   └────────┬─────────┘
+                            │
+                            ▼
+               ┌──────────────────────────┐
+               │ Topic / Uploaded Material│
+               └────────────┬─────────────┘
+                            │
+                            ▼
+                     ┌─────────────┐
+                     │  RAG / LLM  │
+                     └──────┬──────┘
+                            │
+                            ▼
                   ┌──────────────────┐
-                  │   Learner Setup  │
+                  │  Personalized    │
+                  │  Lesson Plan     │
                   └────────┬─────────┘
                            │
                            ▼
-              ┌─────────────────────────┐
-              │ Topic / Uploaded Material│
-              └────────────┬────────────┘
+                  ┌──────────────────┐
+                  │  Teaching Video │
+                  │  + AI Voice      │
+                  └────────┬─────────┘
                            │
                            ▼
-                    ┌─────────────┐
-                    │ RAG / LLM   │
+                   ┌───────────────┐
+                   │   Checkpoint  │
+                   │    Question   │
+                   └───────┬───────┘
+                           │
+                    ┌──────┴──────┐
+                    │             │
+                 Correct        Wrong
+                    │             │
+                    │             ▼
+                    │      ┌──────────────┐
+                    │      │   Adaptive   │
+                    │      │ Re-teaching  │
+                    │      └──────┬───────┘
+                    │             │
                     └──────┬──────┘
+                           ▼
+                   ┌───────────────┐
+                   │ Final         │
+                   │ Assessment    │
+                   └───────┬───────┘
                            │
                            ▼
-                 ┌──────────────────┐
-                 │ Personalized     │
-                 │ Lesson Plan      │
-                 └────────┬─────────┘
-                          │
-                          ▼
-                 ┌──────────────────┐
-                 │ Teaching Video   │
-                 │ + AI Voice       │
-                 └────────┬─────────┘
-                          │
-                          ▼
-                  ┌───────────────┐
-                  │ Checkpoint    │
-                  │ Question      │
-                  └───────┬───────┘
-                          │
-                   ┌──────┴──────┐
-                   │             │
-                Correct        Wrong
-                   │             │
-                   │             ▼
-                   │      ┌──────────────┐
-                   │      │ Adaptive     │
-                   │      │ Re-teaching  │
-                   │      └──────┬───────┘
-                   │             │
-                   └──────┬──────┘
-                          ▼
-                  ┌───────────────┐
-                  │ Final         │
-                  │ Assessment    │
-                  └───────┬───────┘
-                          │
-                          ▼
-                  ┌───────────────┐
-                  │ Learning      │
-                  │ Report        │
-                  └───────┬───────┘
-                          │
-                          ▼
-                  ┌───────────────┐
-                  │ Learner       │
-                  │ History       │
-                  └───────────────┘
-Tech Stack
-Component	Technology
-Frontend / UI	Streamlit
-LLM	Google Gemini
-RAG	TF-IDF + scikit-learn
-Document Processing	pypdf, python-docx, python-pptx
-TTS	gTTS
-Video Generation	MoviePy + Pillow
-Persistence	JSON
-Configuration	python-dotenv
-Language	Python
-Project Structure
+                   ┌───────────────┐
+                   │ Learning      │
+                   │ Report        │
+                   └───────┬───────┘
+                           │
+                           ▼
+                   ┌───────────────┐
+                   │ Learner       │
+                   │ History       │
+                   └───────────────┘
+```
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| Frontend / UI | Streamlit |
+| LLM | Google Gemini |
+| RAG | TF-IDF + scikit-learn |
+| Document Processing | pypdf, python-docx, python-pptx |
+| TTS | gTTS |
+| Video Generation | MoviePy + Pillow |
+| Persistence | JSON |
+| Configuration | python-dotenv |
+| Language | Python |
+
+---
+
+## Project Structure
+
+```text
 ai-teacher-hackathon/
 │
 ├── app.py
@@ -235,21 +271,34 @@ ai-teacher-hackathon/
 └── data/
     ├── media/
     └── learner_profiles.json
+```
 
-data/ and .env are excluded from Git using .gitignore.
+> `data/` and `.env` are excluded from Git using `.gitignore`.
 
-Quick Start
-1. Clone the repository
+---
+
+## Quick Start
+
+### 1. Clone the repository
+
+```bash
 git clone https://github.com/pooja-jharani/ai-teacher-hackathon.git
 cd ai-teacher-hackathon
-2. Install dependencies
-pip install -r requirements.txt
-3. Configure environment variables
+```
 
-Create a .env file in the project root.
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the project root.
 
 Example:
 
+```env
 LLM_PROVIDER=gemini
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-3.6-flash
@@ -257,30 +306,41 @@ GEMINI_MODEL=gemini-3.6-flash
 TTS_PROVIDER=gtts
 
 AVATAR_PROVIDER=slides
+```
 
-Never commit .env or API keys to GitHub.
+> **Never commit `.env` or API keys to GitHub.**
 
-4. Run the application
+### 4. Run the Application
+
+```bash
 streamlit run app.py
+```
 
 The Streamlit interface will open in your browser.
 
-Current Video / Avatar Implementation
+---
+
+## Current Video / Avatar Implementation
 
 The current implementation uses:
 
+```env
 AVATAR_PROVIDER=slides
+```
 
 The slide-based provider generates narrated educational videos with synchronized audio and visuals.
 
-D-ID and HeyGen providers are structured as optional provider paths in video.py, but they are not enabled in the current working configuration.
+D-ID and HeyGen providers are structured as optional provider paths in `video.py`, but they are not enabled in the current working configuration.
 
 This keeps the demonstrated pipeline reproducible without requiring an external avatar API.
 
-Adaptive Learning Example
+---
+
+## Adaptive Learning Example
 
 A typical interaction looks like:
 
+```text
 Learner answers checkpoint
           ↓
       Evaluation
@@ -289,38 +349,43 @@ Learner answers checkpoint
           ↓
   Misconception detected
           ↓
- Alternative explanation
+  Alternative explanation
           ↓
-    Re-teaching
+     Re-teaching
           ↓
-   New checkpoint
+    New checkpoint
           ↓
-     Assessment
+      Assessment
+```
 
 This allows the system to respond to learner performance instead of following a completely fixed lesson sequence.
 
-Testing
+---
+
+## Testing
 
 The following components have been tested:
 
-Gemini connectivity
-Lesson generation
-RAG ingestion and retrieval
-English TTS
-Hindi TTS
-Slide-based video generation
-Audio-video synchronization
-Streamlit video playback
-Checkpoint evaluation
-Adaptive re-teaching
-Final assessment
-Learning report
-Learner profile persistence
-End-to-end lesson flow
-End-to-End Validation
+- Gemini connectivity
+- Lesson generation
+- RAG ingestion and retrieval
+- English TTS
+- Hindi TTS
+- Slide-based video generation
+- Audio-video synchronization
+- Streamlit video playback
+- Checkpoint evaluation
+- Adaptive re-teaching
+- Final assessment
+- Learning report
+- Learner profile persistence
+- End-to-end lesson flow
+
+### End-to-End Validation
 
 The complete flow was validated as:
 
+```text
 Lesson Setup
      ↓
 Lesson Generation
@@ -340,68 +405,85 @@ Final Assessment
 Learning Report
      ↓
 Learner History
-Evaluation Criteria Coverage
-Criterion	Implementation
-Human-Like Teaching & Adaptation	Adaptive checkpoint evaluation and re-teaching
-AI / ML & LLM	Gemini-powered lesson generation and evaluation
-RAG & Knowledge Grounding	Document ingestion + TF-IDF retrieval
-AI Teaching Video	MoviePy/Pillow slide-based video generation
-Multilingual Capability	Language-aware lessons + English/Hindi TTS
-Voice	gTTS narration
-Innovation	Misconception-aware adaptive re-teaching
-UX / Interface	Streamlit interactive learning flow
-Documentation	README + module documentation
-Design Philosophy
+```
+
+---
+
+## Evaluation Criteria Coverage
+
+| Criterion | Implementation |
+|---|---|
+| Human-Like Teaching & Adaptation | Adaptive checkpoint evaluation and re-teaching |
+| AI / ML & LLM | Gemini-powered lesson generation and evaluation |
+| RAG & Knowledge Grounding | Document ingestion + TF-IDF retrieval |
+| AI Teaching Video | MoviePy/Pillow slide-based video generation |
+| Multilingual Capability | Language-aware lessons + English/Hindi TTS |
+| Voice | gTTS narration |
+| Innovation | Misconception-aware adaptive re-teaching |
+| UX / Interface | Streamlit interactive learning flow |
+| Documentation | README + module documentation |
+
+---
+
+## Design Philosophy
 
 AI Teacher is designed around a simple principle:
 
-Teaching should adapt to the learner, not force every learner through the same explanation.
+> **Teaching should adapt to the learner, not force every learner through the same explanation.**
 
-The system therefore combines:
+The system combines:
 
-Personalized lesson planning
-Knowledge grounding
-Interactive checkpoints
-Performance evaluation
-Adaptive re-teaching
-Voice-based instruction
-Learning history
+- Personalized lesson planning
+- Knowledge grounding
+- Interactive checkpoints
+- Performance evaluation
+- Adaptive re-teaching
+- Voice-based instruction
+- Learning history
 
 into a single learning loop.
 
-Known Limitations
-Slide-Based Avatar
+---
+
+## Known Limitations
+
+### Slide-Based Avatar
 
 The current demo uses narrated educational slides rather than a photorealistic talking avatar.
 
 The video pipeline is fully functional, but external avatar services such as D-ID or HeyGen are not enabled in the current configuration.
 
-Lightweight Retrieval
+### Lightweight Retrieval
 
 RAG currently uses TF-IDF retrieval rather than neural embeddings.
 
 This keeps the system lightweight and easy to run locally.
 
-Local Persistence
+### Local Persistence
 
 Learner profiles are currently stored in a local JSON file rather than a production database.
 
-Future Improvements
+---
+
+## Future Improvements
 
 Possible future extensions include:
 
-Real-time talking-avatar integration
-Neural embedding-based retrieval
-Vector database integration
-Cloud learner profiles
-More languages and TTS providers
-Richer educational animations
-Advanced learner analytics
-Long-term personalized learning paths
-Hackathon
+- Real-time talking-avatar integration
+- Neural embedding-based retrieval
+- Vector database integration
+- Cloud learner profiles
+- More languages and TTS providers
+- Richer educational animations
+- Advanced learner analytics
+- Long-term personalized learning paths
 
-AI Innovation Hackathon 2026 — Round 2
+---
 
-Theme: Bharat Academix
+## Hackathon
 
-AI Teacher demonstrates an end-to-end AI-powered personalized teaching workflow combining LLMs, RAG, adaptive learning, voice narration, video generation, assessment, and learner persistence.
+**AI Innovation Hackathon 2026 — Round 2**
+
+**Theme:** Bharat Academix
+
+AI Teacher demonstrates an end-to-end AI-powered personalized teaching workflow combining **LLMs, RAG, adaptive learning, voice narration, video generation, assessment, and learner persistence**.

@@ -1,157 +1,407 @@
 # AI Teacher 🎓
-### A human-like AI educator that teaches through personalized video lessons
+
+### Personalized AI-powered learning through interactive lessons, voice narration, adaptive teaching, and learning history
 
 Built for **AI Innovation Hackathon 2026 — Round 2 (Bharat Academix)**.
 
 ---
 
-## What this is
+## Overview
 
-Upload a book/PDF/notes/slides — or just type a topic — and the AI Teacher:
-1. Retrieves relevant material (RAG) or teaches from general knowledge
-2. Plans a personalized lesson (level, time budget, language)
-3. Turns each part into a narrated teaching video with visuals
-4. Asks checkpoint questions, evaluates your answers, and **re-teaches
-   differently** if you're wrong (not just "incorrect, try again")
-5. Runs a final assessment and gives you a scored report with
-   strengths, weak areas, and what to study next
-6. Remembers your learning history across sessions
+AI Teacher is an AI-powered learning platform that creates personalized lessons based on a learner's topic, level, language, and available time.
 
-This directly implements every mandatory requirement in the assessment
-brief and is built to be genuinely extended, not just a demo shell —
-every module (RAG, planning, evaluation, voice, video) is real, working
-code you can run today.
+Learners can either:
 
----
+- Upload learning material such as PDF, DOCX, or PPTX
+- Provide a topic directly
 
-## Quick start
+The system then:
 
-```bash
-cd ai_teacher
-pip install -r requirements.txt
-
-# Ubuntu/Debian only, needed for the offline TTS fallback:
-sudo apt-get install -y espeak-ng ffmpeg
-```
-
-Create a `.env` file in this folder (copy `.env.example`):
-
-```env
-LLM_PROVIDER=anthropic          # or "openai"
-ANTHROPIC_API_KEY=sk-ant-...    # get one at console.anthropic.com
-# OPENAI_API_KEY=sk-...
-
-TTS_PROVIDER=gtts               # "offline" | "gtts" | "elevenlabs"
-# ELEVENLABS_API_KEY=...        # only needed if TTS_PROVIDER=elevenlabs
-
-AVATAR_PROVIDER=slides          # "slides" | "did" | "heygen"
-# DID_API_KEY=...               # only needed if AVATAR_PROVIDER=did
-# HEYGEN_API_KEY=...            # only needed if AVATAR_PROVIDER=heygen
-```
-
-Run it:
-
-```bash
-streamlit run app.py
-```
-
-That's it — with just an LLM key, the app runs fully end-to-end using the
-offline/free fallbacks for voice and video, so you always have a working
-demo even with no other API keys.
+1. Retrieves relevant information from uploaded material using RAG.
+2. Generates a structured and personalized lesson using an LLM.
+3. Converts lesson segments into narrated teaching videos.
+4. Asks checkpoint questions during the lesson.
+5. Evaluates learner responses.
+6. Detects incorrect understanding and triggers adaptive re-teaching.
+7. Conducts a final assessment.
+8. Generates a learning report with score, strengths, weak areas, and recommendations.
+9. Persists learner history across sessions.
 
 ---
 
-## Why it's built this way
+## Key Features
 
-**RAG uses TF-IDF, not a neural embedding model.** This needs no model
-download (works with zero internet dependency beyond the LLM call itself),
-is fast, and is genuinely good enough to ground short lesson material.
-Swapping in OpenAI/Cohere embeddings later is a one-file change
-(`retrieval.py`) if you want to push retrieval quality further for the
-"RAG and Knowledge Grounding" evaluation criterion.
+### 📚 RAG-Based Learning
 
-**Video defaults to narrated slides, not a photoreal avatar.** Talking-
-avatar APIs (D-ID, HeyGen) need paid keys and external network access,
-which may not be available while developing/testing. The `slides` mode
-renders a real narrated video (title, subject-aware visual box, captions,
-synced audio) so the *entire pipeline runs today, offline, for free*.
-`video.py` has stubbed `_render_did_video` / `_render_heygen_video`
-functions ready to fill in — swap `AVATAR_PROVIDER` in `.env` once you
-have a key, and nothing else in the app changes. **For the strongest
-submission, get a free D-ID or HeyGen trial key and finish that
-integration** — it's the single highest-impact upgrade for the "AI
-Teaching Video Generation" and "Voice & AI Avatar" criteria (25% combined).
+Learners can upload study material.
 
-**The adaptive loop is the core of the app, not an add-on.** When a
-student answers a checkpoint question wrong, `evaluator.py` doesn't just
-say "incorrect" — it identifies the specific misconception, and
-`planner.regenerate_segment_simpler()` produces a genuinely different
-explanation (new analogy, simpler language, new example), not a repeat.
-This directly targets the highest-weighted criterion (Human-Like Teaching
-& Adaptation, 20%).
+The system:
+
+`Document → Text Extraction → Chunking → Retrieval → Grounded Lesson`
+
+The current retrieval implementation uses **TF-IDF**, providing a lightweight approach without requiring a separate embedding model.
+
+Supported document formats include:
+
+- PDF
+- DOCX
+- PPTX
 
 ---
 
-## Project structure
+### 🤖 AI Lesson Generation
 
-```
-ai_teacher/
-├── app.py              # Streamlit UI — the full lesson flow
-├── config.py            # All provider/API-key configuration
-├── ingest.py             # PDF/DOCX/PPTX parsing + chunking
-├── retrieval.py           # TF-IDF RAG retriever
-├── llm.py                  # Provider-agnostic LLM wrapper (Anthropic/OpenAI)
-├── planner.py               # Lesson plan generation + adaptive re-teaching
-├── evaluator.py               # Answer evaluation + misconception detection
-├── tts.py                      # Text-to-speech (offline/gTTS/ElevenLabs)
-├── video.py                     # Slide/avatar video rendering
-├── profile_store.py              # Learner profile persistence (JSON)
-├── report.py                      # End-of-lesson assessment report
+Lessons are generated dynamically based on:
+
+- Topic
+- Learner level
+- Language
+- Available lesson time
+- Retrieved learning material, when provided
+
+The lesson is divided into manageable teaching segments with checkpoints.
+
+---
+
+### 🔄 Adaptive Re-Teaching
+
+Adaptive teaching is a core part of the system.
+
+When a learner gives an incorrect answer:
+
+`Wrong Answer → Evaluation → Feedback → Re-teaching → New Checkpoint`
+
+Instead of simply repeating the same explanation, the system generates a simpler alternative explanation with different examples or analogies.
+
+---
+
+### 🌐 Multilingual Teaching
+
+The system supports language-aware lesson generation and narration.
+
+Currently tested:
+
+- English
+- Hindi
+
+The selected language is passed through the lesson-generation and TTS pipeline.
+
+---
+
+### 🔊 AI Voice
+
+The current TTS provider is **gTTS**.
+
+Both English and Hindi narration have been tested successfully.
+
+---
+
+### 🎥 Teaching Video Generation
+
+The application generates slide-based teaching videos containing:
+
+- Lesson title
+- Subject-aware visual content
+- Captions
+- AI-generated narration
+- Synchronized audio
+
+The generated videos are playable directly through the Streamlit application.
+
+---
+
+### 📊 Assessment & Learning Report
+
+At the end of a lesson, the system provides:
+
+- Assessment score
+- Strong concepts
+- Weak concepts
+- Personalized recommendation
+- Learning history
+
+---
+
+### 💾 Learner Profile Persistence
+
+Learner sessions are stored locally in JSON format.
+
+The system maintains:
+
+- Session history
+- Strong concepts
+- Weak concepts
+- Recommendations
+- Timestamps
+
+This allows learning history to persist across sessions.
+
+---
+
+## Application Flow
+
+```text
+                  ┌──────────────────┐
+                  │   Learner Setup  │
+                  └────────┬─────────┘
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │ Topic / Uploaded Material│
+              └────────────┬────────────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │ RAG / LLM   │
+                    └──────┬──────┘
+                           │
+                           ▼
+                 ┌──────────────────┐
+                 │ Personalized     │
+                 │ Lesson Plan      │
+                 └────────┬─────────┘
+                          │
+                          ▼
+                 ┌──────────────────┐
+                 │ Teaching Video   │
+                 │ + AI Voice       │
+                 └────────┬─────────┘
+                          │
+                          ▼
+                  ┌───────────────┐
+                  │ Checkpoint    │
+                  │ Question      │
+                  └───────┬───────┘
+                          │
+                   ┌──────┴──────┐
+                   │             │
+                Correct        Wrong
+                   │             │
+                   │             ▼
+                   │      ┌──────────────┐
+                   │      │ Adaptive     │
+                   │      │ Re-teaching  │
+                   │      └──────┬───────┘
+                   │             │
+                   └──────┬──────┘
+                          ▼
+                  ┌───────────────┐
+                  │ Final         │
+                  │ Assessment    │
+                  └───────┬───────┘
+                          │
+                          ▼
+                  ┌───────────────┐
+                  │ Learning      │
+                  │ Report        │
+                  └───────┬───────┘
+                          │
+                          ▼
+                  ┌───────────────┐
+                  │ Learner       │
+                  │ History       │
+                  └───────────────┘
+Tech Stack
+Component	Technology
+Frontend / UI	Streamlit
+LLM	Google Gemini
+RAG	TF-IDF + scikit-learn
+Document Processing	pypdf, python-docx, python-pptx
+TTS	gTTS
+Video Generation	MoviePy + Pillow
+Persistence	JSON
+Configuration	python-dotenv
+Language	Python
+Project Structure
+ai-teacher-hackathon/
+│
+├── app.py
+├── config.py
+├── ingest.py
+├── retrieval.py
+├── llm.py
+├── planner.py
+├── evaluator.py
+├── tts.py
+├── video.py
+├── profile_store.py
+├── report.py
+│
 ├── requirements.txt
-└── data/                            # Generated media + profile storage (gitignored)
-```
+├── .env.example
+├── .gitignore
+├── README.md
+│
+└── data/
+    ├── media/
+    └── learner_profiles.json
 
----
+data/ and .env are excluded from Git using .gitignore.
 
-## Evaluation criteria coverage
+Quick Start
+1. Clone the repository
+git clone https://github.com/pooja-jharani/ai-teacher-hackathon.git
+cd ai-teacher-hackathon
+2. Install dependencies
+pip install -r requirements.txt
+3. Configure environment variables
 
-| Criterion | Weight | Where it's implemented |
-|---|---|---|
-| Human-Like Teaching & Adaptation | 20% | `planner.regenerate_segment_simpler`, `evaluator.py` |
-| AI/ML & LLM Implementation | 15% | `llm.py`, `planner.py` prompt design |
-| RAG & Knowledge Grounding | 15% | `ingest.py`, `retrieval.py` |
-| AI Teaching Video Generation | 15% | `video.py` |
-| Multilingual Capability | 10% | `language` parameter threaded through every prompt + `tts.py` |
-| Voice & AI Avatar | 10% | `tts.py`, `video.py` |
-| Innovation & Originality | 5% | Misconception-specific re-teaching (not generic retry) |
-| UX/Interface | 5% | `app.py` Streamlit flow |
-| Documentation | 5% | This README + inline module docstrings |
+Create a .env file in the project root.
 
-## Mandatory requirements checklist
+Example:
 
-- [x] Learning from uploaded material (RAG) — `ingest.py` + `retrieval.py`
-- [x] Topic-based teaching — `app.py` "Just give me a topic" mode
-- [x] AI-generated lesson structure — `planner.generate_lesson_plan`
-- [x] Personalized teaching (level/time/language) — threaded through every prompt
-- [x] Human-like teaching interaction — segment-by-segment with checkpoints
-- [x] Video-based presentation — `video.py`
-- [x] AI voice — `tts.py`
-- [x] Human-like AI avatar — `video.py` (slides by default; plug in D-ID/HeyGen for a real avatar)
-- [x] Multilingual — language selector, all prompts language-aware
-- [x] Student questioning and assessment — checkpoints + final assessment
-- [x] Adaptive response to performance — `regenerate_segment_simpler`
-- [x] Working prototype — runs end-to-end via `streamlit run app.py`
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-3.6-flash
 
-## What to finish before submission
+TTS_PROVIDER=gtts
 
-1. **Get an LLM API key** (Anthropic or OpenAI) — nothing works without this
-2. **Get a free D-ID or HeyGen trial key** and fill in the two stub
-   functions in `video.py` — this is the highest-value remaining work
-3. Test the full flow once with a real PDF upload and a wrong-answer path
-   to confirm the re-teaching loop feels natural
-4. Record your 3–7 min demo video showing: upload → personalized video
-   lesson → wrong answer → adaptive re-explanation → correct answer →
-   final report
-5. Fill in "Known limitations" in your submission doc — be upfront that
-   TF-IDF retrieval and slide-based video are deliberate scope choices
-   for a 3-day build, not oversights
+AVATAR_PROVIDER=slides
+
+Never commit .env or API keys to GitHub.
+
+4. Run the application
+streamlit run app.py
+
+The Streamlit interface will open in your browser.
+
+Current Video / Avatar Implementation
+
+The current implementation uses:
+
+AVATAR_PROVIDER=slides
+
+The slide-based provider generates narrated educational videos with synchronized audio and visuals.
+
+D-ID and HeyGen providers are structured as optional provider paths in video.py, but they are not enabled in the current working configuration.
+
+This keeps the demonstrated pipeline reproducible without requiring an external avatar API.
+
+Adaptive Learning Example
+
+A typical interaction looks like:
+
+Learner answers checkpoint
+          ↓
+      Evaluation
+          ↓
+      Incorrect?
+          ↓
+  Misconception detected
+          ↓
+ Alternative explanation
+          ↓
+    Re-teaching
+          ↓
+   New checkpoint
+          ↓
+     Assessment
+
+This allows the system to respond to learner performance instead of following a completely fixed lesson sequence.
+
+Testing
+
+The following components have been tested:
+
+Gemini connectivity
+Lesson generation
+RAG ingestion and retrieval
+English TTS
+Hindi TTS
+Slide-based video generation
+Audio-video synchronization
+Streamlit video playback
+Checkpoint evaluation
+Adaptive re-teaching
+Final assessment
+Learning report
+Learner profile persistence
+End-to-end lesson flow
+End-to-End Validation
+
+The complete flow was validated as:
+
+Lesson Setup
+     ↓
+Lesson Generation
+     ↓
+Teaching Video
+     ↓
+Checkpoint
+     ↓
+Intentional Wrong Answer
+     ↓
+Adaptive Re-teaching
+     ↓
+New Checkpoint
+     ↓
+Final Assessment
+     ↓
+Learning Report
+     ↓
+Learner History
+Evaluation Criteria Coverage
+Criterion	Implementation
+Human-Like Teaching & Adaptation	Adaptive checkpoint evaluation and re-teaching
+AI / ML & LLM	Gemini-powered lesson generation and evaluation
+RAG & Knowledge Grounding	Document ingestion + TF-IDF retrieval
+AI Teaching Video	MoviePy/Pillow slide-based video generation
+Multilingual Capability	Language-aware lessons + English/Hindi TTS
+Voice	gTTS narration
+Innovation	Misconception-aware adaptive re-teaching
+UX / Interface	Streamlit interactive learning flow
+Documentation	README + module documentation
+Design Philosophy
+
+AI Teacher is designed around a simple principle:
+
+Teaching should adapt to the learner, not force every learner through the same explanation.
+
+The system therefore combines:
+
+Personalized lesson planning
+Knowledge grounding
+Interactive checkpoints
+Performance evaluation
+Adaptive re-teaching
+Voice-based instruction
+Learning history
+
+into a single learning loop.
+
+Known Limitations
+Slide-Based Avatar
+
+The current demo uses narrated educational slides rather than a photorealistic talking avatar.
+
+The video pipeline is fully functional, but external avatar services such as D-ID or HeyGen are not enabled in the current configuration.
+
+Lightweight Retrieval
+
+RAG currently uses TF-IDF retrieval rather than neural embeddings.
+
+This keeps the system lightweight and easy to run locally.
+
+Local Persistence
+
+Learner profiles are currently stored in a local JSON file rather than a production database.
+
+Future Improvements
+
+Possible future extensions include:
+
+Real-time talking-avatar integration
+Neural embedding-based retrieval
+Vector database integration
+Cloud learner profiles
+More languages and TTS providers
+Richer educational animations
+Advanced learner analytics
+Long-term personalized learning paths
+Hackathon
+
+AI Innovation Hackathon 2026 — Round 2
+
+Theme: Bharat Academix
+
+AI Teacher demonstrates an end-to-end AI-powered personalized teaching workflow combining LLMs, RAG, adaptive learning, voice narration, video generation, assessment, and learner persistence.

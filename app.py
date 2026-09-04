@@ -37,6 +37,7 @@ def init_state():
         "topic": "",
         "language": "English",
         "level": "Beginner",
+        "report_saved": False,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -246,7 +247,8 @@ def render_report():
 
     st.info(f"**Recommendation:** {lesson_report.recommendation}")
 
-    profile_store.record_session(
+    if not st.session_state.report_saved:
+        profile_store.record_session(
         student_id=st.session_state.student_id,
         topic=st.session_state.topic,
         score=lesson_report.score_percent,
@@ -254,6 +256,7 @@ def render_report():
         weak=lesson_report.weak_concepts,
         recommendation=lesson_report.recommendation,
     )
+    st.session_state.report_saved = True
 
     profile = profile_store.get_profile(st.session_state.student_id)
     with st.expander("Your learning history"):
